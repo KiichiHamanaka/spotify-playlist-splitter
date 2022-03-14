@@ -1,16 +1,9 @@
-import axios from "axios";
 import SpotifyWebApi from "spotify-web-api-node";
 
-const CLIENTID = process.env.SpotifyClientID!;
-const CLIENTSECRET = process.env.SpotifyClientSecret!;
-const REDIRECTURL = process.env.SpotifyRedirectURL!;
-
-export const fetchGet = (url: string) => axios.get(url).then((res) => res.data);
-
 export const spotifyApi = new SpotifyWebApi({
-  redirectUri: REDIRECTURL,
-  clientId: CLIENTID,
-  clientSecret: CLIENTSECRET,
+  redirectUri: process.env.SpotifyRedirectURL,
+  clientId: process.env.SpotifyClientID,
+  clientSecret: process.env.SpotifyClientSecret,
 });
 
 const scopes = [
