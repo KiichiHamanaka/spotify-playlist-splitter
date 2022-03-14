@@ -3,7 +3,7 @@ import SpotifyWebApi from "spotify-web-api-node";
 
 const CLIENTID = process.env.SpotifyClientID!;
 const CLIENTSECRET = process.env.SpotifyClientSecret!;
-const REDIRECTURL = "http://localhost:3000/api/callback/";
+const REDIRECTURL = process.env.SpotifyRedirectURL!;
 
 export const fetchGet = (url: string) => axios.get(url).then((res) => res.data);
 
