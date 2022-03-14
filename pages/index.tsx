@@ -58,7 +58,6 @@ const Home: NextPage<Props> = ({ authorizeURL }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  console.log(context.req.cookies);
   if (context.req.cookies["access_token"]) {
     return {
       props: {},

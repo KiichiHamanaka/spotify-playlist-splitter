@@ -1,4 +1,13 @@
-import SpotifyWebApi from "spotify-web-api-node";
+import { SpotifyWebApi } from "spotify-web-api-ts";
+import { AuthorizationScope } from "spotify-web-api-ts/types/types/SpotifyAuthorization";
+
+const scopes: AuthorizationScope[] = [
+  "user-library-read",
+  "user-library-modify",
+  "user-read-private",
+  "playlist-modify-public",
+];
+const state = "spotify-favorite-converter";
 
 export const spotifyApi = new SpotifyWebApi({
   redirectUri: process.env.SpotifyRedirectURL,
@@ -6,33 +15,34 @@ export const spotifyApi = new SpotifyWebApi({
   clientSecret: process.env.SpotifyClientSecret,
 });
 
-const scopes = [
-  "user-library-read",
-  "user-library-modify",
-  "playlist-modify-public",
-];
-const state = "some-state-of-my-choice";
+export const authorizeURL = spotifyApi.getRefreshableAuthorizationUrl({
+  scope: scopes,
+  state,
+});
 
-export const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
-
-export const convertPlaylists = async (name: string) => {
-  const result = await spotifyApi.createPlaylist(name);
-  const playListId: string = result.body.id as string;
-  await addTrackToPlayList(playListId);
+export const convertPlaylists = async (playlistName: string) => {
+  const user = await spotifyApi.users.getMe();
+  console.log("よっこらしょういち");
+  console.log(user);
+  const playlist = await spotifyApi.playlists.createPlaylist(
+    user.id,
+    playlistName
+  );
+  await addTrackToPlayList(playlist.id);
 };
 
 export const addTrackToPlayList = async (
   playListId: string,
   offset: number = 0
 ) => {
-  const result = await spotifyApi.getMySavedTracks({
+  const getSavedTracksResponse = await spotifyApi.library.getSavedTracks({
     offset: offset,
     limit: 50,
   });
-  const trackIdArray = result.body.items.map((item) => item.track.uri);
-  await spotifyApi.addTracksToPlaylist(playListId, trackIdArray);
-  if (result.body.next !== null) {
-    const nextOffsetRegExp = result.body.next
+  const trackURIs = getSavedTracksResponse.items.map((item) => item.track.uri);
+  await spotifyApi.playlists.addItemsToPlaylist(playListId, trackURIs);
+  if (getSavedTracksResponse.next !== null) {
+    const nextOffsetRegExp = getSavedTracksResponse.next
       .match(/(?<=offset=)(.*)(.*)(?=&)/)!
       .find((str) => str) as string;
     const nextOffset = parseInt(nextOffsetRegExp);
